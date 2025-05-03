@@ -10,7 +10,7 @@ import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
 const { height, width } = Dimensions.get('screen');
 
 const COOKIE_STORAGE_KEY = 'persistedCookies';
-const SITE_URL = 'https://freedium.cfd';
+const SITE_URL = 'https://freedium.cfd/';
 
 interface WebViewComponentProps {
   uri: string;

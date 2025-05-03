@@ -18,7 +18,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  const [currentUrl, setCurrentUrl] = useState('https://freedium.cfd');
+  const [currentUrl, setCurrentUrl] = useState('https://freedium.cfd/');
 
   useEffect(() => {
     if (loaded) {
