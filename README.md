@@ -27,7 +27,7 @@ That's it! The next time you open a Medium article on any of these domains, it s
 
 ## Under the hood
 
-This app is basically a wrapper around [Freedium](https://freedium.cfd/), but with the added bonus of being able to immediate open Medium articles for free (as long as you have done the proper configurations) without navigating to freedium manually. It makes use of Android's `intentFilters` and [deep links](https://developer.android.com/training/app-links/deep-linking) to automate this.
+This app is basically a wrapper around [Freedium](https://freedium-mirror.cfd/), but with the added bonus of being able to immediate open Medium articles for free (as long as you have done the proper configurations) without navigating to freedium manually. It makes use of Android's `intentFilters` and [deep links](https://developer.android.com/training/app-links/deep-linking) to automate this.
 
 ## Developing
 
