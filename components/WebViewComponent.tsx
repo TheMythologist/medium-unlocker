@@ -90,7 +90,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
       <WebView
         ref={webViewRef}
         style={styles.container}
-        source={{ uri: `${SITE_URL}/${uri}` }}
+        source={{ uri: `${SITE_URL}${uri}` }}
         originWhitelist={[SITE_URL]}
         sharedCookiesEnabled={true}
         thirdPartyCookiesEnabled={true}
