@@ -132,6 +132,7 @@
             { "host": "towardsdatascience.com" },
             { "host": "*.medium.com" },
             { "host": "medium.com" },
+            { "host": "freedium-mirror.cfd" },
 
             { "scheme": "https" },
             { "scheme": "http" },
