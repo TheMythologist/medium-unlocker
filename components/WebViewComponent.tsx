@@ -110,6 +110,11 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
     }
   };
 
+  const INJECTED_JS_BEFORE_CONTENT = `
+    try { localStorage.setItem('theme', '${isDark ? 'dark' : 'light'}'); } catch(e) {}
+    true;
+  `;
+
   const INJECTED_JS = `
     (function() {
       let lastTop = 0;
@@ -243,6 +248,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
         onLoadEnd={onLoadEnd}
         onLoadProgress={onLoadProgress}
         onMessage={onWebViewMessage}
+        injectedJavaScriptBeforeContentLoaded={INJECTED_JS_BEFORE_CONTENT}
         injectedJavaScript={INJECTED_JS}
         domStorageEnabled={true}
       />
