@@ -25,11 +25,16 @@ jobs:
 
       - name: 🚀 Build Android production apk
         if: startsWith(github.ref, 'refs/tags/')
-        run: eas build -p android --profile production --non-interactive --output ${{ github.workspace }}/medium_unlocker_${{ github.ref_name }}.apk
+        run: eas build -p android --profile production --non-interactive
 
       - name: 🚀 Build Android preview apk
         if: "!startsWith(github.ref, 'refs/tags/')"
-        run: eas build -p android --profile preview --non-interactive --output ${{ github.workspace }}/medium_unlocker_${{ github.ref_name }}.apk
+        run: eas build -p android --profile preview --non-interactive
+
+      - name: 📥 Download APK from EAS
+        run: |
+          APK_URL=$(eas build:list --platform android --status finished --limit 1 --json --non-interactive | jq -r '.[0].artifacts.buildUrl')
+          curl -L -o ${{ github.workspace }}/medium_unlocker_${{ github.ref_name }}.apk "$APK_URL"
 
       - name: 🚀 Upload artifact
         uses: actions/upload-artifact@v7
