@@ -6,6 +6,7 @@ const config: { expo: ExpoConfig } = {
     name: 'Medium Unlocker',
     slug: 'medium-unlocker',
     version,
+    buildCacheProvider: 'eas',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
@@ -155,11 +156,6 @@ const config: { expo: ExpoConfig } = {
         },
       ],
     },
-    web: {
-      bundler: 'metro',
-      output: 'static',
-      favicon: './assets/images/favicon.png',
-    },
     plugins: ['expo-router', '@react-native-async-storage/expo-with-async-storage', 'expo-font'],
     experiments: {
       typedRoutes: true,
@@ -169,13 +165,6 @@ const config: { expo: ExpoConfig } = {
         origin: false,
       },
       eas: {
-        build: {
-          experimental: {
-            ios: {
-              appExtensions: [],
-            },
-          },
-        },
         projectId: 'f2c1cae3-6390-4aa9-8df8-2f92c0993d55',
       },
     },
