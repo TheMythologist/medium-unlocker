@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@preeternal/react-native-cookie-manager": "^6.3.1",
     "@react-native-async-storage/async-storage": "3.0.1",
     "@react-native-async-storage/expo-with-async-storage": "^1.0.0",
     "@react-navigation/native": "^7.0.14",
@@ -27,8 +28,6 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.2",
-    "react-native-nitro-cookies": "^1.1.0",
-    "react-native-nitro-modules": "^0.35.0",
     "react-native-progress": "^5.0.1",
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.2",

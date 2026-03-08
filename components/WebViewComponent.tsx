@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import CookieManager, { type Cookies } from '@preeternal/react-native-cookie-manager';
 import { createAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useEffect, useRef, useState } from 'react';
 import {
@@ -11,7 +12,6 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import CookieManager, { type Cookies } from 'react-native-nitro-cookies';
 import * as Progress from 'react-native-progress';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
