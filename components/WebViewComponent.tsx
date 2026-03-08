@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -33,6 +33,7 @@ const RESTING_PULL_DISTANCE = DEFAULT_CIRCLE_TARGET - CIRCLE_DIAMETER / 2;
 const { height, width } = Dimensions.get('screen');
 
 const COOKIE_STORAGE_KEY = 'persistedCookies';
+const cookieStorage = createAsyncStorage(COOKIE_STORAGE_KEY);
 const SITE_URL = 'https://freedium-mirror.cfd/';
 
 interface WebViewComponentProps {
@@ -152,7 +153,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
 
   useEffect(() => {
     const restoreCookies = async () => {
-      const savedCookies = await AsyncStorage.getItem(COOKIE_STORAGE_KEY);
+      const savedCookies = await cookieStorage.getItem(COOKIE_STORAGE_KEY);
       if (savedCookies) {
         const parsedCookies: Cookies = JSON.parse(savedCookies);
         await Promise.all(
@@ -182,7 +183,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const onNavigationStateChange = async (event: WebViewNavigation) => {
     setCurrentUrl(event.url);
     const cookies = await CookieManager.get(SITE_URL);
-    await AsyncStorage.setItem(COOKIE_STORAGE_KEY, JSON.stringify(cookies));
+    await cookieStorage.setItem(COOKIE_STORAGE_KEY, JSON.stringify(cookies));
   };
 
   const onLoadProgress = (event: WebViewProgressEvent) => {
