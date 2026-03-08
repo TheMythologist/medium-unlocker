@@ -4,14 +4,10 @@
   },
   "build": {
     "preview": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      }
+      "distribution": "internal"
     },
     "production": {
-      "android": {
-        "buildType": "apk"
-      }
+      "distribution": "internal"
     }
   }
 }
