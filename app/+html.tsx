@@ -1,5 +1,8 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 import { type PropsWithChildren } from 'react';
+import { vexo } from 'vexo-analytics';
+
+vexo('9bea21c9-6936-4b3d-bee0-0948a4533526');
 
 /**
  * This file is web-only and used to configure the root HTML for every web page during static rendering.
