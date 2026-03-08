@@ -37,6 +37,37 @@ const COOKIE_STORAGE_KEY = 'persistedCookies';
 const cookieStorage = createAsyncStorage(COOKIE_STORAGE_KEY);
 const SITE_URL = 'https://freedium-mirror.cfd/';
 
+const INJECTED_JS = `
+  (function() {
+    function getScrollTop() {
+      return window.pageYOffset || document.documentElement.scrollTop || 0;
+    }
+    function postScroll(scrollTop) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'scrollPosition',
+        scrollTop: scrollTop
+      }));
+    }
+    let lastTop = 0;
+    window.addEventListener('scroll', function() {
+      var scrollTop = getScrollTop();
+      if ((lastTop <= 1) !== (scrollTop <= 1)) {
+        postScroll(scrollTop);
+      }
+      lastTop = scrollTop;
+    }, { passive: true });
+    postScroll(getScrollTop());
+    // Re-check after browser scroll restoration (back/forward navigation).
+    // Scroll restore happens during layout, so wait 2 frames to be sure.
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        postScroll(getScrollTop());
+      });
+    });
+  })();
+  true;
+`;
+
 interface WebViewComponentProps {
   uri: string;
 }
@@ -52,6 +83,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const isDark = useColorScheme() === 'dark';
 
   const isAtTopRef = useRef(true);
+  const wasAtTopOnTouchStartRef = useRef(false);
   const isRefreshingRef = useRef(false);
   const pullDistance = useRef(new Animated.Value(0)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -59,9 +91,13 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
 
   const panResponder = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => {
+        wasAtTopOnTouchStartRef.current = isAtTopRef.current;
+        return false;
+      },
       onMoveShouldSetPanResponder: (_, gestureState) =>
         !isRefreshingRef.current &&
-        isAtTopRef.current &&
+        wasAtTopOnTouchStartRef.current &&
         gestureState.dy > 5 &&
         Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
       onPanResponderMove: (_, gestureState) => {
@@ -114,27 +150,6 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
 
   const INJECTED_JS_BEFORE_CONTENT = `
     try { localStorage.setItem('theme', '${isDark ? 'dark' : 'light'}'); } catch(e) {}
-    true;
-  `;
-
-  const INJECTED_JS = `
-    (function() {
-      let lastTop = 0;
-      window.addEventListener('scroll', function() {
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
-        if ((lastTop <= 1) !== (scrollTop <= 1)) {
-          window.ReactNativeWebView.postMessage(JSON.stringify({
-            type: 'scrollPosition',
-            scrollTop: scrollTop
-          }));
-        }
-        lastTop = scrollTop;
-      }, { passive: true });
-      window.ReactNativeWebView.postMessage(JSON.stringify({
-        type: 'scrollPosition',
-        scrollTop: window.pageYOffset || document.documentElement.scrollTop || 0
-      }));
-    })();
     true;
   `;
 
