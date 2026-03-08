@@ -5,11 +5,12 @@ import { ThemedView } from '@/components/ThemedView';
 import WebViewComponent from '@/components/WebViewComponent';
 
 export default function HomeScreen() {
-  const url = useLinkingURL();
+  const rawUrl = useLinkingURL();
+  const url = rawUrl?.match(/^https?:\/\//) ? rawUrl : '';
 
   return (
     <ThemedView style={styles.container}>
-      <WebViewComponent uri={url || ''} />
+      <WebViewComponent uri={url} />
     </ThemedView>
   );
 }
