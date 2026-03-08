@@ -4,10 +4,12 @@
   },
   "build": {
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "environment": "preview"
     },
     "production": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "environment": "production"
     }
   }
 }
