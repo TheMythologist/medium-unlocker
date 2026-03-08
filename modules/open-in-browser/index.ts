@@ -14,3 +14,11 @@ export function openExternal(url: string): void {
     Linking.openURL(url);
   }
 }
+
+export function openLinkSettings(): Promise<void> {
+  return OpenInBrowserModule.openLinkSettings();
+}
+
+export function isDefaultForLinks(): Promise<boolean> {
+  return OpenInBrowserModule.isDefaultForLinks();
+}

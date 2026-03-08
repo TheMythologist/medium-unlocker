@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import Toast from 'react-native-toast-message';
+import LinkSettingsPrompt from '@/components/LinkSettingsPrompt';
 import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
 import { openExternal } from '@/modules/open-in-browser';
 
@@ -52,6 +53,7 @@ export default function RootLayout() {
           <Stack.Screen name="+not-found" />
         </Stack>
       </ThemeProvider>
+      <LinkSettingsPrompt />
       <Toast position="bottom" />
     </CurrentUrlContext.Provider>
   );
