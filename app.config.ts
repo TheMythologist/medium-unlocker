@@ -32,6 +32,15 @@ const config: { expo: ExpoConfig } = {
           action: 'VIEW',
           data: [
             { host: 'freedium-mirror.cfd' },
+            { scheme: 'https' },
+            { pathPattern: '/..*' },
+            { pathPattern: '/' },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [
             { host: 'medium.com' },
             { host: '*.medium.com' },
 
