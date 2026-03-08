@@ -16,6 +16,7 @@ import * as Progress from 'react-native-progress';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
 import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
+import { openExternal } from '@/modules/open-in-browser';
 
 // Chrome SwipeRefreshLayout values (dp maps 1:1 in RN)
 const CIRCLE_DIAMETER = 40;
@@ -191,6 +192,14 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
     setPercentageLoaded(event.nativeEvent.progress);
   };
 
+  const onShouldStartLoadWithRequest = (request: { url: string }) => {
+    if (request.url.startsWith(SITE_URL)) {
+      return true;
+    }
+    openExternal(request.url);
+    return false;
+  };
+
   const onLoadStart = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = undefined;
@@ -231,9 +240,9 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
         ref={webViewRef}
         style={styles.container}
         source={{ uri: `${SITE_URL}${uri}` }}
-        originWhitelist={[SITE_URL]}
         sharedCookiesEnabled={true}
         thirdPartyCookiesEnabled={true}
+        onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         onNavigationStateChange={onNavigationStateChange}
         allowsBackForwardNavigationGestures
         onLoadStart={onLoadStart}

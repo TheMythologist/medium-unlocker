@@ -3,9 +3,10 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import * as Clipboard from 'expo-clipboard';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Linking, StyleSheet, View, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
+import { openExternal } from '@/modules/open-in-browser';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -18,10 +19,6 @@ export default function RootLayout() {
       type: 'success',
       text1: 'URL copied to clipboard',
     });
-  };
-
-  const openInBrowser = () => {
-    Linking.openURL(currentUrl);
   };
 
   return (
@@ -45,7 +42,7 @@ export default function RootLayout() {
                   <TouchableOpacity onPress={copyToClipboard}>
                     <Ionicons name="copy-outline" size={22} color="#007AFF" />
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={openInBrowser}>
+                  <TouchableOpacity onPress={() => openExternal(currentUrl)}>
                     <Ionicons name="open-outline" size={22} color="#007AFF" />
                   </TouchableOpacity>
                 </View>
