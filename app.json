@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
@@ -15,10 +15,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "mediumunlocker",
-      "userInterfaceStyle": "dark"
+      "userInterfaceStyle": "automatic"
     },
     "android": {
-      "userInterfaceStyle": "dark",
+      "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#1a1c24"
@@ -150,7 +150,8 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-async-storage/expo-with-async-storage"
+      "@react-native-async-storage/expo-with-async-storage",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
