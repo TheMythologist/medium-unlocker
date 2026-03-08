@@ -51,25 +51,22 @@ export default function RootLayout() {
             options={{
               title: currentUrl,
               headerTitle: ({ children }) => (
-                <View style={styles.titleContainer}>
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={[
-                      styles.urlText,
-                      { color: colorScheme === 'dark' ? '#c6c7c6' : '#000' },
-                    ]}>
-                    {children}
-                  </Text>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={[styles.urlText, { color: colorScheme === 'dark' ? '#c6c7c6' : '#000' }]}>
+                  {children}
+                </Text>
+              ),
+              headerRight: () => (
+                <View style={styles.rightContainer}>
                   <TouchableOpacity onPress={copyToClipboard}>
                     <Ionicons name="copy-outline" size={22} color="#007AFF" />
                   </TouchableOpacity>
+                  <TouchableOpacity onPress={openInBrowser}>
+                    <Ionicons name="open-outline" size={22} color="#007AFF" />
+                  </TouchableOpacity>
                 </View>
-              ),
-              headerRight: () => (
-                <TouchableOpacity onPress={openInBrowser}>
-                  <Ionicons name="open-outline" size={22} color="#007AFF" />
-                </TouchableOpacity>
               ),
             }}
           />
@@ -82,11 +79,10 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flex: 1,
+  rightContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 65,
+    gap: 12,
   },
   urlText: {
     flex: 1,

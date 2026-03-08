@@ -1,6 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CookieManager, { type Cookies } from '@react-native-cookies/cookies';
 import { useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -12,6 +11,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import CookieManager, { type Cookies } from 'react-native-nitro-cookies';
 import * as Progress from 'react-native-progress';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
@@ -42,7 +42,7 @@ interface WebViewComponentProps {
 export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const webViewRef = useRef<WebView>(null);
   const canGoBackRef = useRef(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [percentageLoaded, setPercentageLoaded] = useState(0);
 
@@ -156,16 +156,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
       if (savedCookies) {
         const parsedCookies: Cookies = JSON.parse(savedCookies);
         await Promise.all(
-          Object.entries(parsedCookies).map(([cookieName, cookie]) =>
-            CookieManager.set(SITE_URL, {
-              name: cookieName,
-              value: cookie.value,
-              domain: cookie.domain,
-              path: cookie.path || '/',
-              version: '1',
-              expires: cookie.expires || undefined,
-            }),
-          ),
+          Object.values(parsedCookies).map((cookie) => CookieManager.set(SITE_URL, cookie)),
         );
       }
       setIsLoading(false);
@@ -183,8 +174,8 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
     };
 
     if (Platform.OS === 'android') {
-      BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
-      return () => BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
+      return () => backHandler.remove();
     }
   }, []);
 

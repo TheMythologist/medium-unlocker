@@ -1,11 +1,11 @@
-import { useURL } from 'expo-linking';
+import { useLinkingURL } from 'expo-linking';
 import { StyleSheet } from 'react-native';
 
 import { ThemedView } from '@/components/ThemedView';
 import WebViewComponent from '@/components/WebViewComponent';
 
 export default function HomeScreen() {
-  const url = useURL();
+  const url = useLinkingURL();
 
   return (
     <ThemedView style={styles.container}>
