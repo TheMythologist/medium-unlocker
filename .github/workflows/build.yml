@@ -14,7 +14,7 @@ jobs:
           cache: npm
 
       - name: 🏗 Setup EAS
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@b184ff86a3c926240f1b6db41764c83a01c02eef # v8 tag has not been updated
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
