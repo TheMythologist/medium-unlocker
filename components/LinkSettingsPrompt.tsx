@@ -1,4 +1,5 @@
 import { createAsyncStorage } from '@react-native-async-storage/async-storage';
+import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
 import {
   AppState,
@@ -47,15 +48,20 @@ export default function LinkSettingsPrompt() {
     return () => sub.remove();
   }, []);
 
-  const dismiss = () => setVisible(false);
+  const dismiss = () => {
+    impactAsync(ImpactFeedbackStyle.Light);
+    setVisible(false);
+  };
 
   const dismissPermanently = async () => {
+    impactAsync(ImpactFeedbackStyle.Light);
     dismissedRef.current = true;
     await storage.setItem(DISMISSED_KEY, 'true');
     setVisible(false);
   };
 
   const openSettings = () => {
+    impactAsync(ImpactFeedbackStyle.Light);
     dismiss();
     openLinkSettings();
   };

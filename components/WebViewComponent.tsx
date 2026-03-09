@@ -1,6 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import CookieManager, { type Cookies } from '@preeternal/react-native-cookie-manager';
 import { createAsyncStorage } from '@react-native-async-storage/async-storage';
+import { impactAsync, ImpactFeedbackStyle } from 'expo-haptics';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -137,6 +138,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
             duration: ANIMATE_TO_TRIGGER_DURATION,
             useNativeDriver: false,
           }).start(() => {
+            impactAsync(ImpactFeedbackStyle.Medium);
             const loop = Animated.loop(
               Animated.timing(spinAnim, {
                 toValue: 1,
