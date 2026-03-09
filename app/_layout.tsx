@@ -2,14 +2,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import { Stack } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { vexo } from 'vexo-analytics';
+import HistorySheet from '@/components/HistorySheet';
 import LinkSettingsPrompt from '@/components/LinkSettingsPrompt';
 import { Colors } from '@/constants/colors';
 import { SITE_URL } from '@/constants/config';
-import { CurrentUrlContext, ReloadContext } from '@/hooks/useCurrentUrlContext';
+import {
+  CurrentUrlContext,
+  HistoryContext,
+  NavigateContext,
+  ReloadContext,
+} from '@/hooks/useCurrentUrlContext';
+import { useHistory } from '@/hooks/useHistory';
 import { openExternal } from '@/modules/open-in-browser';
 
 vexo('9bea21c9-6936-4b3d-bee0-0948a4533526');
@@ -20,6 +27,13 @@ export default function RootLayout() {
 
   const [currentUrl, setCurrentUrl] = useState(SITE_URL);
   const reloadRef = useRef<(() => void) | null>(null);
+  const navigateRef = useRef<((url: string) => void) | null>(null);
+  const { history, addEntry, clearHistory } = useHistory();
+  const historyCtx = useMemo(
+    () => ({ history, addEntry, clearHistory }),
+    [history, addEntry, clearHistory],
+  );
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(currentUrl);
@@ -32,40 +46,48 @@ export default function RootLayout() {
   return (
     <CurrentUrlContext.Provider value={[currentUrl, setCurrentUrl]}>
       <ReloadContext.Provider value={reloadRef}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                title: currentUrl,
-                headerTitle: ({ children }) => (
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={[styles.urlText, { color: theme.headerText }]}>
-                    {children}
-                  </Text>
-                ),
-                headerRight: () => (
-                  <View style={styles.rightContainer}>
-                    <TouchableOpacity onPress={() => reloadRef.current?.()}>
-                      <Ionicons name="reload-outline" size={22} color={theme.accent} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={copyToClipboard}>
-                      <Ionicons name="copy-outline" size={22} color={theme.accent} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openExternal(currentUrl)}>
-                      <Ionicons name="open-outline" size={22} color={theme.accent} />
-                    </TouchableOpacity>
-                  </View>
-                ),
-              }}
-            />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </ThemeProvider>
-        <LinkSettingsPrompt />
-        <Toast position="bottom" />
+        <NavigateContext.Provider value={navigateRef}>
+          <HistoryContext.Provider value={historyCtx}>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Stack>
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{
+                    title: currentUrl,
+                    headerTitle: ({ children }) => (
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        style={[styles.urlText, { color: theme.headerText }]}>
+                        {children}
+                      </Text>
+                    ),
+                    headerRight: () => (
+                      <View style={styles.rightContainer}>
+                        <TouchableOpacity onPress={() => setHistoryVisible(true)}>
+                          <Ionicons name="time-outline" size={22} color={theme.accent} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => reloadRef.current?.()}>
+                          <Ionicons name="reload-outline" size={22} color={theme.accent} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={copyToClipboard}>
+                          <Ionicons name="copy-outline" size={22} color={theme.accent} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => openExternal(currentUrl)}>
+                          <Ionicons name="open-outline" size={22} color={theme.accent} />
+                        </TouchableOpacity>
+                      </View>
+                    ),
+                  }}
+                />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </ThemeProvider>
+            <HistorySheet visible={historyVisible} onDismiss={() => setHistoryVisible(false)} />
+            <LinkSettingsPrompt />
+            <Toast position="bottom" />
+          </HistoryContext.Provider>
+        </NavigateContext.Provider>
       </ReloadContext.Provider>
     </CurrentUrlContext.Provider>
   );

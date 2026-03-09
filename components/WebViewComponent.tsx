@@ -22,7 +22,12 @@ import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
 import { Colors } from '@/constants/colors';
 import { SITE_URL } from '@/constants/config';
-import { CurrentUrlContext, ReloadContext } from '@/hooks/useCurrentUrlContext';
+import {
+  CurrentUrlContext,
+  HistoryContext,
+  NavigateContext,
+  ReloadContext,
+} from '@/hooks/useCurrentUrlContext';
 import { openExternal } from '@/modules/open-in-browser';
 
 // Chrome SwipeRefreshLayout values (dp maps 1:1 in RN)
@@ -81,6 +86,14 @@ const INJECTED_JS = `
         }));
       }
     });
+
+    if (window.location.pathname.length > 1) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'pageInfo',
+        title: document.title || window.location.pathname.slice(1),
+        url: window.location.href
+      }));
+    }
   })();
   true;
 `;
@@ -101,6 +114,8 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
 
   const [, setCurrentUrl] = useContext(CurrentUrlContext);
   const reloadRef = useContext(ReloadContext);
+  const navigateRef = useContext(NavigateContext);
+  const { addEntry } = useContext(HistoryContext);
   const isDark = useColorScheme() === 'dark';
   const theme = Colors[isDark ? 'dark' : 'light'];
   const { height, width } = useWindowDimensions();
@@ -168,6 +183,8 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
         isAtTopRef.current = data.scrollTop <= 1;
       } else if (data.type === 'linkLongPress') {
         setLongPressedLink(data.url);
+      } else if (data.type === 'pageInfo') {
+        addEntry(data.url, data.title);
       }
     } catch {
       // ignore non-JSON messages
@@ -253,10 +270,13 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   useEffect(() => {
     reloadRef.current = () =>
       webViewRef.current?.injectJavaScript('window.location.reload(); true;');
+    navigateRef.current = (url: string) =>
+      webViewRef.current?.injectJavaScript(`window.location.href = ${JSON.stringify(url)}; true;`);
     return () => {
       reloadRef.current = null;
+      navigateRef.current = null;
     };
-  }, [reloadRef]);
+  }, [reloadRef, navigateRef]);
 
   useEffect(() => {
     const restoreCookies = async () => {
