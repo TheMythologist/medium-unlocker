@@ -1,39 +1,41 @@
-# Welcome to Medium Unlocker 👋
+# Medium Unlocker
 
 [![Latest release](https://img.shields.io/github/v/release/TheMythologist/medium-unlocker)](https://github.com/TheMythologist/medium-unlocker/releases/latest)
 [![CI status](https://github.com/TheMythologist/medium-unlocker/workflows/build/badge.svg)](https://github.com/TheMythologist/medium-unlocker/actions?query=branch%3Amain)
 [![Downloads](https://img.shields.io/github/downloads/TheMythologist/medium-unlocker/total)](https://github.com/TheMythologist/medium-unlocker/releases)
 
-## Download
+Medium Unlocker is an Android app that lets you read Medium articles for free. It intercepts Medium links on your device and opens them through [Freedium](https://freedium-mirror.cfd/) — no manual URL pasting required.
 
-Go to the [`latest release`](https://github.com/TheMythologist/medium_unlocker/releases/latest)
-and download the APK.
+## Installation
 
-## How to use
+1. Download the APK from the [latest release](https://github.com/TheMythologist/medium_unlocker/releases/latest).
+2. Install the APK on your Android device.
+3. Configure your device to open Medium links with Medium Unlocker. The app will prompt you to open link settings on first launch — just tap **Open Settings** in the modal. You can also navigate there manually:
 
-Download and install the Medium Unlocker APK.
+   > **Settings** > **Apps** > **Default apps** > **Opening links** > **Medium Unlocker** > **Add link** > Enable all domains
 
-Next, go to Android settings and configure your device to open links using Medium Unlocker.
+> [!NOTE]
+> If you are unable to add any links, ensure the original Medium app is **not installed**. Alternatively, disable Medium's supported links and the domains should become available in Medium Unlocker.
 
-*Note*: Unfortunately we are unable to automate this process because we do not have control over the Medium domains.
+Once configured, any Medium article link you tap will automatically open in Medium Unlocker.
 
-This may be slightly different from phone to phone, but the flow should be roughly:
+## Features
 
-1. Go to Settings
-2. Select Apps > Default apps
-3. Select Opening links
-4. Find Medium Unlocker > "Add link"
-5. Enable all the links to be opened by Medium Unlocker
-   - *Note*: If you are unable to add any links, ensure that you **do not** have the original Medium app installed.
-   - If you do not wish to uninstall the original Medium application, disable Medium from opening supported links. You should be able to add the domains in Medium Unlocker now.
+- **Reading History** — Browse your last 100 visited articles via the header clock icon. Tap to revisit or clear your history.
+- **Long-Press Context Menu** — Long-press any link to copy, open in browser, or share it.
+- **Pull-to-Refresh** — Pull down to reload with haptic feedback and a smooth animation.
+- **Header Actions** — Reload the page, copy the current URL, or open it in your default browser.
+- **Dark/Light Mode** — Automatically adapts to your system theme.
+- **Deep Link Support** — Handles 100+ Medium-related domains out of the box.
+- **Persistent Cookies** — Session state is preserved between app restarts.
 
-That's it! The next time you open a Medium article on any of these domains, it should automatically open it in Medium Unlocker!
+## How It Works
 
-## Under the hood
+Medium Unlocker uses Android [deep links](https://developer.android.com/training/app-links/deep-linking) and `intentFilters` to register itself as a handler for Medium domains. When you tap a Medium link anywhere on your device, the app intercepts it and loads the article through Freedium, bypassing the paywall automatically.
 
-This app is basically a wrapper around [Freedium](https://freedium-mirror.cfd/), but with the added bonus of being able to immediate open Medium articles for free (as long as you have done the proper configurations) without navigating to freedium manually. It makes use of Android's `intentFilters` and [deep links](https://developer.android.com/training/app-links/deep-linking) to automate this.
+## Development
 
-## Developing
-
-1. Install the dependencies via `npm install`
-2. Start the app via `npx expo start`
+```sh
+npm install
+npx expo start
+```
