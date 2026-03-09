@@ -1,11 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import CookieManager, { type Cookies } from '@preeternal/react-native-cookie-manager';
 import { createAsyncStorage } from '@react-native-async-storage/async-storage';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   BackHandler,
-  Modal,
   PanResponder,
   Platform,
   Pressable,
@@ -17,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import * as Progress from 'react-native-progress';
+import Toast from 'react-native-toast-message';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
 import { Colors } from '@/constants/colors';
@@ -95,6 +95,8 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [percentageLoaded, setPercentageLoaded] = useState(0);
   const [longPressedLink, setLongPressedLink] = useState<string | null>(null);
+  const menuSlide = useRef(new Animated.Value(300)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   const [, setCurrentUrl] = useContext(CurrentUrlContext);
   const reloadRef = useContext(ReloadContext);
@@ -170,13 +172,49 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
     }
   };
 
-  const dismissLinkMenu = () => setLongPressedLink(null);
+  useEffect(() => {
+    if (longPressedLink) {
+      menuSlide.setValue(300);
+      backdropOpacity.setValue(0);
+      Animated.parallel([
+        Animated.timing(menuSlide, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [longPressedLink, menuSlide, backdropOpacity]);
+
+  const dismissLinkMenu = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(menuSlide, {
+        toValue: 300,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setLongPressedLink(null));
+  }, [backdropOpacity, menuSlide]);
 
   const copyLink = async () => {
     if (!longPressedLink) return;
     const Clipboard = await import('expo-clipboard');
     await Clipboard.setStringAsync(longPressedLink);
     dismissLinkMenu();
+    Toast.show({
+      type: 'success',
+      text1: 'URL copied to clipboard',
+    });
   };
 
   const shareLink = async () => {
@@ -256,6 +294,15 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
       return () => backHandler.remove();
     }
   }, []);
+
+  useEffect(() => {
+    if (!longPressedLink || Platform.OS !== 'android') return;
+    const handler = BackHandler.addEventListener('hardwareBackPress', () => {
+      dismissLinkMenu();
+      return true;
+    });
+    return () => handler.remove();
+  }, [dismissLinkMenu, longPressedLink]);
 
   const onNavigationStateChange = async (event: WebViewNavigation) => {
     setCurrentUrl(event.url);
@@ -358,13 +405,15 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
           width={width}
         />
       )}
-      <Modal
-        visible={!!longPressedLink}
-        transparent
-        animationType="fade"
-        onRequestClose={dismissLinkMenu}>
-        <Pressable style={styles.menuBackdrop} onPress={dismissLinkMenu}>
-          <View style={[styles.menuCard, { backgroundColor: theme.cardBackground }]}>
+      {longPressedLink && (
+        <View style={styles.menuContainer}>
+          <Animated.View style={[styles.menuBackdrop, { opacity: backdropOpacity }]} />
+          <Pressable style={styles.menuDismiss} onPress={dismissLinkMenu} />
+          <Animated.View
+            style={[
+              styles.menuCard,
+              { backgroundColor: theme.cardBackground, transform: [{ translateY: menuSlide }] },
+            ]}>
             <Text numberOfLines={2} style={[styles.menuUrl, { color: theme.secondaryText }]}>
               {longPressedLink}
             </Text>
@@ -392,9 +441,9 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
               onPress={shareLink}>
               <Text style={[styles.menuItemText, { color: theme.text }]}>Share</Text>
             </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 }
@@ -427,10 +476,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
   },
-  menuBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+  menuContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'flex-end',
+  },
+  menuBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  menuDismiss: {
+    flex: 1,
   },
   menuCard: {
     borderTopLeftRadius: 16,
