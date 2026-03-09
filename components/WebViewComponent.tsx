@@ -5,9 +5,13 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   BackHandler,
+  Modal,
   PanResponder,
   Platform,
+  Pressable,
+  Share,
   StyleSheet,
+  Text,
   useColorScheme,
   useWindowDimensions,
   View,
@@ -63,6 +67,19 @@ const INJECTED_JS = `
         postScroll(getScrollTop());
       });
     });
+
+    document.addEventListener('contextmenu', function(e) {
+      var el = e.target;
+      while (el && el.tagName !== 'A') el = el.parentElement;
+      if (el && el.href) {
+        e.preventDefault();
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'linkLongPress',
+          url: el.href,
+          text: el.textContent || ''
+        }));
+      }
+    });
   })();
   true;
 `;
@@ -77,6 +94,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [percentageLoaded, setPercentageLoaded] = useState(0);
+  const [longPressedLink, setLongPressedLink] = useState<string | null>(null);
 
   const [, setCurrentUrl] = useContext(CurrentUrlContext);
   const reloadRef = useContext(ReloadContext);
@@ -144,10 +162,33 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'scrollPosition') {
         isAtTopRef.current = data.scrollTop <= 1;
+      } else if (data.type === 'linkLongPress') {
+        setLongPressedLink(data.url);
       }
     } catch {
       // ignore non-JSON messages
     }
+  };
+
+  const dismissLinkMenu = () => setLongPressedLink(null);
+
+  const copyLink = async () => {
+    if (!longPressedLink) return;
+    const Clipboard = await import('expo-clipboard');
+    await Clipboard.setStringAsync(longPressedLink);
+    dismissLinkMenu();
+  };
+
+  const shareLink = async () => {
+    if (!longPressedLink) return;
+    await Share.share({ url: longPressedLink, message: longPressedLink });
+    dismissLinkMenu();
+  };
+
+  const openLink = () => {
+    if (!longPressedLink) return;
+    openExternal(longPressedLink);
+    dismissLinkMenu();
   };
 
   const INJECTED_JS_BEFORE_CONTENT = `
@@ -270,7 +311,9 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   });
 
   return (
-    <View style={[styles.wrapper, { backgroundColor: theme.background }]} {...panResponder.panHandlers}>
+    <View
+      style={[styles.wrapper, { backgroundColor: theme.background }]}
+      {...panResponder.panHandlers}>
       <WebView
         ref={webViewRef}
         style={[styles.container, { height, width }]}
@@ -315,6 +358,43 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
           width={width}
         />
       )}
+      <Modal
+        visible={!!longPressedLink}
+        transparent
+        animationType="fade"
+        onRequestClose={dismissLinkMenu}>
+        <Pressable style={styles.menuBackdrop} onPress={dismissLinkMenu}>
+          <View style={[styles.menuCard, { backgroundColor: theme.cardBackground }]}>
+            <Text numberOfLines={2} style={[styles.menuUrl, { color: theme.secondaryText }]}>
+              {longPressedLink}
+            </Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.btnPressOverlay },
+              ]}
+              onPress={copyLink}>
+              <Text style={[styles.menuItemText, { color: theme.text }]}>Copy link</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.btnPressOverlay },
+              ]}
+              onPress={openLink}>
+              <Text style={[styles.menuItemText, { color: theme.text }]}>Open in browser</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.menuItem,
+                pressed && { backgroundColor: theme.btnPressOverlay },
+              ]}
+              onPress={shareLink}>
+              <Text style={[styles.menuItemText, { color: theme.text }]}>Share</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -346,5 +426,28 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  menuCard: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  menuUrl: {
+    fontSize: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  menuItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  menuItemText: {
+    fontSize: 16,
   },
 });
