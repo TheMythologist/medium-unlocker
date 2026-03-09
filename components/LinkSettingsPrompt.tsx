@@ -10,12 +10,14 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { Colors } from '@/constants/colors';
 import { isDefaultForLinks, openLinkSettings } from '@/modules/open-in-browser';
 
 export default function LinkSettingsPrompt() {
   const [visible, setVisible] = useState(false);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const theme = Colors[isDark ? 'dark' : 'light'];
 
   const check = () => {
     isDefaultForLinks()
@@ -44,19 +46,21 @@ export default function LinkSettingsPrompt() {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={dismiss}>
       <Pressable style={styles.backdrop} onPress={dismiss}>
-        <View style={[styles.card, isDark ? styles.cardDark : styles.cardLight]}>
-          <Text style={[styles.title, isDark && styles.textDark]}>
+        <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <Text style={[styles.title, { color: isDark ? theme.text : '#000' }]}>
             Open Medium links with this app
           </Text>
-          <Text style={[styles.body, isDark && styles.bodyDark]}>
+          <Text style={[styles.body, { color: theme.bodyText }]}>
             To automatically open Medium links in this app, enable supported links in the app
             settings.
           </Text>
           <View style={styles.buttons}>
             <Pressable style={styles.secondaryBtn} onPress={dismiss}>
-              <Text style={styles.secondaryText}>Not now</Text>
+              <Text style={[styles.secondaryText, { color: theme.secondaryText }]}>Not now</Text>
             </Pressable>
-            <Pressable style={styles.primaryBtn} onPress={openSettings}>
+            <Pressable
+              style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
+              onPress={openSettings}>
               <Text style={styles.primaryText}>Open Settings</Text>
             </Pressable>
           </View>
@@ -84,29 +88,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 12,
   },
-  cardLight: {
-    backgroundColor: '#fff',
-  },
-  cardDark: {
-    backgroundColor: '#2c2c2e',
-  },
   title: {
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 8,
-    color: '#000',
   },
   body: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#555',
     marginBottom: 20,
-  },
-  textDark: {
-    color: '#fff',
-  },
-  bodyDark: {
-    color: '#aaa',
   },
   buttons: {
     flexDirection: 'row',
@@ -121,13 +111,11 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#888',
   },
   primaryBtn: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
-    backgroundColor: '#007AFF',
   },
   primaryText: {
     fontSize: 14,

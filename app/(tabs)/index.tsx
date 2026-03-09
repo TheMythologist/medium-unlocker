@@ -18,12 +18,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    width: '100%',
     overflow: 'hidden',
-    backgroundColor: '#1a1c24',
     marginTop: -10,
   },
 });

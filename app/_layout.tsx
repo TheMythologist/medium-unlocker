@@ -5,14 +5,20 @@ import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, useColorScheme } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { vexo } from 'vexo-analytics';
 import LinkSettingsPrompt from '@/components/LinkSettingsPrompt';
+import { Colors } from '@/constants/colors';
+import { SITE_URL } from '@/constants/config';
 import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
 import { openExternal } from '@/modules/open-in-browser';
 
+vexo('9bea21c9-6936-4b3d-bee0-0948a4533526');
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
-  const [currentUrl, setCurrentUrl] = useState('https://freedium-mirror.cfd/');
+  const [currentUrl, setCurrentUrl] = useState(SITE_URL);
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(currentUrl);
@@ -34,17 +40,17 @@ export default function RootLayout() {
                 <Text
                   numberOfLines={1}
                   ellipsizeMode="tail"
-                  style={[styles.urlText, { color: colorScheme === 'dark' ? '#c6c7c6' : '#000' }]}>
+                  style={[styles.urlText, { color: theme.headerText }]}>
                   {children}
                 </Text>
               ),
               headerRight: () => (
                 <View style={styles.rightContainer}>
                   <TouchableOpacity onPress={copyToClipboard}>
-                    <Ionicons name="copy-outline" size={22} color="#007AFF" />
+                    <Ionicons name="copy-outline" size={22} color={theme.accent} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => openExternal(currentUrl)}>
-                    <Ionicons name="open-outline" size={22} color="#007AFF" />
+                    <Ionicons name="open-outline" size={22} color={theme.accent} />
                   </TouchableOpacity>
                 </View>
               ),

@@ -3,7 +3,7 @@ import { Linking, Platform } from 'react-native';
 
 const OpenInBrowserModule = requireNativeModule('OpenInBrowser');
 
-export function openInBrowser(url: string): Promise<void> {
+function openInBrowser(url: string): Promise<void> {
   return OpenInBrowserModule.openInBrowser(url);
 }
 

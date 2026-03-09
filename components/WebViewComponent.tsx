@@ -5,16 +5,18 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   BackHandler,
-  Dimensions,
   PanResponder,
   Platform,
   StyleSheet,
   useColorScheme,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
+import { Colors } from '@/constants/colors';
+import { SITE_URL } from '@/constants/config';
 import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
 import { openExternal } from '@/modules/open-in-browser';
 
@@ -31,11 +33,8 @@ const MAX_PROGRESS_ROTATION = 0.8; // 0.8 turns = 288 degrees
 // Our translateY = pullDistance - CIRCLE_DIAMETER/2, so pullDistance = 24 + 20 = 44
 const RESTING_PULL_DISTANCE = DEFAULT_CIRCLE_TARGET - CIRCLE_DIAMETER / 2;
 
-const { height, width } = Dimensions.get('screen');
-
 const COOKIE_STORAGE_KEY = 'persistedCookies';
 const cookieStorage = createAsyncStorage(COOKIE_STORAGE_KEY);
-const SITE_URL = 'https://freedium-mirror.cfd/';
 
 const INJECTED_JS = `
   (function() {
@@ -79,8 +78,10 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [percentageLoaded, setPercentageLoaded] = useState(0);
 
-  const [_, setCurrentUrl] = useContext(CurrentUrlContext);
+  const [, setCurrentUrl] = useContext(CurrentUrlContext);
   const isDark = useColorScheme() === 'dark';
+  const theme = Colors[isDark ? 'dark' : 'light'];
+  const { height, width } = useWindowDimensions();
 
   const isAtTopRef = useRef(true);
   const wasAtTopOnTouchStartRef = useRef(false);
@@ -171,14 +172,24 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
     const restoreCookies = async () => {
       const savedCookies = await cookieStorage.getItem(COOKIE_STORAGE_KEY);
       if (savedCookies) {
-        const parsedCookies: Cookies = JSON.parse(savedCookies);
-        await Promise.all(
-          Object.values(parsedCookies).map((cookie) => CookieManager.set(SITE_URL, cookie)),
-        );
+        try {
+          const parsedCookies: Cookies = JSON.parse(savedCookies);
+          await Promise.all(
+            Object.values(parsedCookies).map((cookie) => CookieManager.set(SITE_URL, cookie)),
+          );
+        } catch {
+          await cookieStorage.removeItem(COOKIE_STORAGE_KEY);
+        }
       }
       setIsLoading(false);
     };
     restoreCookies();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -253,7 +264,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
     <View style={styles.wrapper} {...panResponder.panHandlers}>
       <WebView
         ref={webViewRef}
-        style={styles.container}
+        style={[styles.container, { height, width }]}
         source={{ uri: `${SITE_URL}${uri}` }}
         sharedCookiesEnabled={true}
         thirdPartyCookiesEnabled={true}
@@ -273,7 +284,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
         style={[
           styles.indicatorCircle,
           {
-            backgroundColor: isDark ? '#333333' : '#FAFAFA',
+            backgroundColor: theme.refreshIndicatorBg,
             transform: [
               { translateY: indicatorTranslateY },
               { scale: indicatorScale },
@@ -282,7 +293,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
           },
         ]}>
         <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
-          <MaterialIcons name="refresh" size={24} color="#F4811E" />
+          <MaterialIcons name="refresh" size={24} color={Colors.shared.refreshIcon} />
         </Animated.View>
       </Animated.View>
       {isLoading && (
@@ -305,8 +316,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    height,
-    width,
     overflow: 'hidden',
   },
   progressBar: {

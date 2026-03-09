@@ -3,6 +3,6 @@ interface redirectSystemPathProps {
   initial: boolean;
 }
 
-export function redirectSystemPath({ path, initial }: redirectSystemPathProps) {
+export function redirectSystemPath(_props: redirectSystemPathProps) {
   return '/(tabs)';
 }
