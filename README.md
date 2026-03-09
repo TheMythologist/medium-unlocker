@@ -1,5 +1,9 @@
 # Welcome to Medium Unlocker 👋
 
+[![Latest release](https://img.shields.io/github/v/release/TheMythologist/medium-unlocker)](https://github.com/TheMythologist/medium-unlocker/releases/latest)
+[![CI status](https://github.com/TheMythologist/medium-unlocker/workflows/build/badge.svg)](https://github.com/TheMythologist/medium-unlocker/actions?query=branch%3Amain)
+[![Downloads](https://img.shields.io/github/downloads/TheMythologist/medium-unlocker/total)](https://github.com/TheMythologist/medium-unlocker/releases)
+
 ## Download
 
 Go to the [`latest release`](https://github.com/TheMythologist/medium_unlocker/releases/latest)
