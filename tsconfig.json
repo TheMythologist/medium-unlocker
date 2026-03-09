@@ -10,7 +10,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "components/WebViewComponent.tsx"
+    "expo-env.d.ts"
   ]
 }

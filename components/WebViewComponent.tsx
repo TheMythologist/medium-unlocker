@@ -17,7 +17,7 @@ import { WebView, type WebViewNavigation } from 'react-native-webview';
 import type { WebViewProgressEvent } from 'react-native-webview/lib/WebViewTypes';
 import { Colors } from '@/constants/colors';
 import { SITE_URL } from '@/constants/config';
-import { CurrentUrlContext } from '@/hooks/useCurrentUrlContext';
+import { CurrentUrlContext, ReloadContext } from '@/hooks/useCurrentUrlContext';
 import { openExternal } from '@/modules/open-in-browser';
 
 // Chrome SwipeRefreshLayout values (dp maps 1:1 in RN)
@@ -79,6 +79,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   const [percentageLoaded, setPercentageLoaded] = useState(0);
 
   const [, setCurrentUrl] = useContext(CurrentUrlContext);
+  const reloadRef = useContext(ReloadContext);
   const isDark = useColorScheme() === 'dark';
   const theme = Colors[isDark ? 'dark' : 'light'];
   const { height, width } = useWindowDimensions();
@@ -125,7 +126,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
             );
             spinLoopRef.current = loop;
             loop.start();
-            webViewRef.current?.reload();
+            webViewRef.current?.injectJavaScript('window.location.reload(); true;');
           });
         } else {
           Animated.timing(pullDistance, {
@@ -167,6 +168,14 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
       useNativeDriver: false,
     }).start();
   };
+
+  useEffect(() => {
+    reloadRef.current = () =>
+      webViewRef.current?.injectJavaScript('window.location.reload(); true;');
+    return () => {
+      reloadRef.current = null;
+    };
+  }, [reloadRef]);
 
   useEffect(() => {
     const restoreCookies = async () => {
@@ -261,7 +270,7 @@ export default function WebViewComponent({ uri }: WebViewComponentProps) {
   });
 
   return (
-    <View style={styles.wrapper} {...panResponder.panHandlers}>
+    <View style={[styles.wrapper, { backgroundColor: theme.background }]} {...panResponder.panHandlers}>
       <WebView
         ref={webViewRef}
         style={[styles.container, { height, width }]}

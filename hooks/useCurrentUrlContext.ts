@@ -10,3 +10,7 @@ function createCurrentUrlContext() {
 }
 
 export const CurrentUrlContext = createCurrentUrlContext();
+
+export const ReloadContext = createContext<React.RefObject<(() => void) | null>>({
+  current: null,
+});
