@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { createAsyncStorage } from '@react-native-async-storage/async-storage';
+import { useEffect, useRef, useState } from 'react';
 import {
   AppState,
   Modal,
@@ -13,13 +14,23 @@ import {
 import { Colors } from '@/constants/colors';
 import { isDefaultForLinks, openLinkSettings } from '@/modules/open-in-browser';
 
+const DISMISSED_KEY = 'linkPromptDismissed';
+const storage = createAsyncStorage(DISMISSED_KEY);
+
 export default function LinkSettingsPrompt() {
   const [visible, setVisible] = useState(false);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const theme = Colors[isDark ? 'dark' : 'light'];
+  const dismissedRef = useRef(false);
 
-  const check = () => {
+  const check = async () => {
+    if (dismissedRef.current) return;
+    const wasDismissed = await storage.getItem(DISMISSED_KEY);
+    if (wasDismissed === 'true') {
+      dismissedRef.current = true;
+      return;
+    }
     isDefaultForLinks()
       .then((isDefault) => setVisible(!isDefault))
       .catch(() => {});
@@ -38,6 +49,12 @@ export default function LinkSettingsPrompt() {
 
   const dismiss = () => setVisible(false);
 
+  const dismissPermanently = async () => {
+    dismissedRef.current = true;
+    await storage.setItem(DISMISSED_KEY, 'true');
+    setVisible(false);
+  };
+
   const openSettings = () => {
     dismiss();
     openLinkSettings();
@@ -45,7 +62,7 @@ export default function LinkSettingsPrompt() {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={dismiss}>
-      <Pressable style={styles.backdrop} onPress={dismiss}>
+      <View style={styles.backdrop}>
         <View style={[styles.card, { backgroundColor: theme.cardBackground }]}>
           <Text style={[styles.title, { color: isDark ? theme.text : '#000' }]}>
             Open Medium links with this app
@@ -55,17 +72,35 @@ export default function LinkSettingsPrompt() {
             settings.
           </Text>
           <View style={styles.buttons}>
-            <Pressable style={styles.secondaryBtn} onPress={dismiss}>
-              <Text style={[styles.secondaryText, { color: theme.secondaryText }]}>Not now</Text>
-            </Pressable>
             <Pressable
-              style={[styles.primaryBtn, { backgroundColor: theme.accent }]}
+              style={({ pressed }) => [
+                styles.primaryBtn,
+                { backgroundColor: pressed ? Colors.shared.accentPressed : theme.accent },
+              ]}
               onPress={openSettings}>
               <Text style={styles.primaryText}>Open Settings</Text>
             </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                pressed && { backgroundColor: theme.btnPressOverlay },
+              ]}
+              onPress={dismiss}>
+              <Text style={[styles.secondaryText, { color: theme.secondaryText }]}>Not now</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                pressed && { backgroundColor: theme.btnPressOverlay },
+              ]}
+              onPress={dismissPermanently}>
+              <Text style={[styles.secondaryText, { color: theme.secondaryText }]}>
+                Don't ask again
+              </Text>
+            </Pressable>
           </View>
         </View>
-      </Pressable>
+      </View>
     </Modal>
   );
 }
@@ -99,23 +134,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
+    gap: 4,
   },
   secondaryBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
+    alignItems: 'center',
   },
   secondaryText: {
     fontSize: 14,
     fontWeight: '600',
   },
   primaryBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 8,
+    alignItems: 'center',
   },
   primaryText: {
     fontSize: 14,

@@ -8,6 +8,7 @@ export const Colors = {
     cardBackground: '#fff',
     bodyText: '#555',
     secondaryText: '#888',
+    btnPressOverlay: '#00000010',
   },
   dark: {
     text: '#ECEDEE',
@@ -18,8 +19,10 @@ export const Colors = {
     cardBackground: '#2c2c2e',
     bodyText: '#aaa',
     secondaryText: '#888',
+    btnPressOverlay: '#ffffff15',
   },
   shared: {
     refreshIcon: '#F4811E',
+    accentPressed: '#005bb5',
   },
 };
