@@ -1,0 +1,21 @@
+diff --git a/node_modules/react-native-toast-message/lib/src/hooks/useKeyboard.js b/node_modules/react-native-toast-message/lib/src/hooks/useKeyboard.js
+index 4e963b3..b409be9 100644
+--- a/node_modules/react-native-toast-message/lib/src/hooks/useKeyboard.js
++++ b/node_modules/react-native-toast-message/lib/src/hooks/useKeyboard.js
+@@ -1,6 +1,5 @@
+ import React from 'react';
+ import { Keyboard } from 'react-native';
+-import { isIOS } from '../utils/platform';
+ export function useKeyboard() {
+     const [keyboardHeight, setKeyboardHeight] = React.useState(0);
+     const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
+@@ -14,9 +13,6 @@ export function useKeyboard() {
+         setIsKeyboardVisible(false);
+     }, []);
+     React.useEffect(() => {
+-        if (!isIOS()) {
+-            return () => { };
+-        }
+         const didShowListener = Keyboard.addListener('keyboardDidShow', onShow);
+         const didHideListener = Keyboard.addListener('keyboardDidHide', onHide);
+         return () => {
