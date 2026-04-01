@@ -4,6 +4,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Stack } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { vexo } from 'vexo-analytics';
 import HistorySheet from '@/components/HistorySheet';
@@ -44,52 +45,54 @@ export default function RootLayout() {
   };
 
   return (
-    <CurrentUrlContext.Provider value={[currentUrl, setCurrentUrl]}>
-      <ReloadContext.Provider value={reloadRef}>
-        <NavigateContext.Provider value={navigateRef}>
-          <HistoryContext.Provider value={historyCtx}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Stack>
-                <Stack.Screen
-                  name="(tabs)"
-                  options={{
-                    title: currentUrl,
-                    headerTitle: ({ children }) => (
-                      <Text
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                        style={[styles.urlText, { color: theme.headerText }]}>
-                        {children}
-                      </Text>
-                    ),
-                    headerRight: () => (
-                      <View style={styles.rightContainer}>
-                        <TouchableOpacity onPress={() => setHistoryVisible(true)}>
-                          <Ionicons name="time-outline" size={22} color={theme.accent} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => reloadRef.current?.()}>
-                          <Ionicons name="reload-outline" size={22} color={theme.accent} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={copyToClipboard}>
-                          <Ionicons name="copy-outline" size={22} color={theme.accent} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => openExternal(currentUrl)}>
-                          <Ionicons name="open-outline" size={22} color={theme.accent} />
-                        </TouchableOpacity>
-                      </View>
-                    ),
-                  }}
-                />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </ThemeProvider>
-            <HistorySheet visible={historyVisible} onDismiss={() => setHistoryVisible(false)} />
-            <LinkSettingsPrompt />
-            <Toast position="bottom" />
-          </HistoryContext.Provider>
-        </NavigateContext.Provider>
-      </ReloadContext.Provider>
-    </CurrentUrlContext.Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <CurrentUrlContext.Provider value={[currentUrl, setCurrentUrl]}>
+        <ReloadContext.Provider value={reloadRef}>
+          <NavigateContext.Provider value={navigateRef}>
+            <HistoryContext.Provider value={historyCtx}>
+              <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <Stack>
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{
+                      title: currentUrl,
+                      headerTitle: ({ children }) => (
+                        <Text
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          style={[styles.urlText, { color: theme.headerText }]}>
+                          {children}
+                        </Text>
+                      ),
+                      headerRight: () => (
+                        <View style={styles.rightContainer}>
+                          <TouchableOpacity onPress={() => setHistoryVisible(true)}>
+                            <Ionicons name="time-outline" size={22} color={theme.accent} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => reloadRef.current?.()}>
+                            <Ionicons name="reload-outline" size={22} color={theme.accent} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={copyToClipboard}>
+                            <Ionicons name="copy-outline" size={22} color={theme.accent} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => openExternal(currentUrl)}>
+                            <Ionicons name="open-outline" size={22} color={theme.accent} />
+                          </TouchableOpacity>
+                        </View>
+                      ),
+                    }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              </ThemeProvider>
+              <HistorySheet visible={historyVisible} onDismiss={() => setHistoryVisible(false)} />
+              <LinkSettingsPrompt />
+              <Toast position="bottom" />
+            </HistoryContext.Provider>
+          </NavigateContext.Provider>
+        </ReloadContext.Provider>
+      </CurrentUrlContext.Provider>
+    </GestureHandlerRootView>
   );
 }
 
