@@ -44,7 +44,7 @@
     "vexo-analytics": "^1.5.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
+    "@babel/core": "^7.29.6",
     "@types/react": "~19.2.10",
     "@typescript-eslint/eslint-plugin": "~8.57.0",
     "@typescript-eslint/parser": "^8.57.0",
